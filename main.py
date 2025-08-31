@@ -36,7 +36,7 @@ async def conversar(mensagem: Mensagem):
         mensagens.append({"role": "user", "content": mensagem.pergunta})
 
         resposta = client.chat.completions.create(
-            model="openai/gpt-4.1-mini",
+            model="openai/gpt-5-mini",
             messages=mensagens
         )
 
