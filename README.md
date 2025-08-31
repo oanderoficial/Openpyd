@@ -13,6 +13,12 @@
 - **API RESTful**: Backend robusto com FastAPI
 - **Deploy Simplificado**: Configurado para Render
 
+<img width="2450" height="1832" alt="image" src="https://github.com/user-attachments/assets/013dc574-b202-40da-89d4-6d48237610ad" />
+
+<img width="2450" height="1832" alt="image" src="https://github.com/user-attachments/assets/2b9b238c-feb1-4757-b2b4-f18036724eeb" />
+
+<img width="2450" height="1832" alt="image" src="https://github.com/user-attachments/assets/4fe4ba46-4fd3-4c94-bebc-6a4a61cfcc12" />
+
 ## Tecnologias e Arquitetura
 
 ### Backend
