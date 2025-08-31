@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Openpyd AI</title>
+  <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #1a1a2e;
+      --bg-tertiary: #16213e;
+      --accent-primary: #6366f1;
+      --accent-secondary: #8b5cf6;
+      --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --text-primary: #ffffff;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-primary);
+      background-image: 
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      background: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: all 0.3s ease;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      background: var(--accent-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-gradient);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.2rem;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      scroll-behavior: smooth;
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .msg {
+      max-width: 85%;
+      padding: 1.25rem 1.5rem;
+      border-radius: 20px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: var(--shadow-md);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .user {
+      align-self: flex-end;
+      background: var(--accent-gradient);
+      color: white;
+      border-bottom-right-radius: 8px;
+      position: relative;
+    }
+
+    .user::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      bottom: -1px;
+      left: -1px;
+      background: var(--accent-gradient);
+      border-radius: inherit;
+      z-index: -1;
+      filter: blur(8px);
+      opacity: 0.3;
+    }
+
+    .ai {
+      align-self: flex-start;
+      background: var(--glass-bg);
+      border-bottom-left-radius: 8px;
+      position: relative;
+    }
+
+    .ai::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+      border-radius: inherit;
+      z-index: -1;
+    }
+
+    .loading {
+      align-self: center;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: pulse 2s infinite;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      animation: typing 1.4s infinite ease-in-out;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    .scroll-down {
+      position: fixed;
+      bottom: 120px;
+      right: 30px;
+      background: var(--accent-gradient);
+      border: none;
+      color: white;
+      padding: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      box-shadow: var(--shadow-lg);
+      display: none;
+      z-index: 1000;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .scroll-down:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+
+    .input-container {
+      padding: 1.5rem 2rem 2rem;
+      background: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-color);
+      position: sticky;
+      bottom: 0;
+    }
+
+    form {
+      display: flex;
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border-color);
+      border-radius: 25px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(10px);
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    .send-button {
+      background: var(--accent-gradient);
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: var(--shadow-md);
+    }
+
+    .send-button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .send-button:active {
+      transform: translateY(0);
+    }
+
+    .send-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    footer {
+      padding: 1.5rem 2rem;
+      background: rgba(26, 26, 46, 0.6);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    footer a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: var(--accent-secondary);
+    }
+
+    /* Code blocks styling */
+    pre {
+      background: rgba(0, 0, 0, 0.4) !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 12px !important;
+      margin: 1rem 0 !important;
+      overflow-x: auto !important;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem 1.5rem;
+      }
+
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      #chat {
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+      }
+
+      .msg {
+        max-width: 95%;
+        padding: 1rem 1.25rem;
+        border-radius: 16px;
+      }
+
+      .input-container {
+        padding: 1rem 1.5rem;
+      }
+
+      form {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .send-button {
+        align-self: flex-end;
+        padding: 0.875rem 1.25rem;
+      }
+
+      .scroll-down {
+        bottom: 140px;
+        right: 20px;
+        padding: 10px;
+      }
+
+      footer {
+        padding: 1rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .msg {
+        max-width: 100%;
+        padding: 0.875rem 1rem;
+        border-radius: 12px;
+      }
+
+      form {
+        gap: 0.5rem;
+      }
+
+      input[type="text"] {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+      }
+
+      .send-button {
+        padding: 0.875rem 1rem;
+        font-size: 0.95rem;
+      }
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.5);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>
+      <div class="header-icon">
+        <i class="fas fa-robot"></i>
+      </div>
+      Openpyd AI
+    </h1>
+  </header>
+
+  <div id="chat"></div>
+  <button id="scrollBtn" class="scroll-down">
+    <i class="fas fa-arrow-down"></i>
+  </button>
+
+  <div class="input-container">
+    <form id="formulario">
+      <div class="input-wrapper">
+        <input type="text" id="pergunta" placeholder="Digite sua dúvida sobre Python..." required>
+      </div>
+      <button type="submit" class="send-button" id="sendBtn">
+        <i class="fas fa-paper-plane"></i>
+        <span>Enviar</span>
+      </button>
+    </form>
+  </div>
+
+  <footer>
+    Desenvolvido com ❤️ por <a href="https://github.com/oanderoficial">@oanderoficial</a>
+  </footer>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const form = document.getElementById("formulario");
+    const perguntaInput = document.getElementById("pergunta");
+    const scrollBtn = document.getElementById("scrollBtn");
+    const sendBtn = document.getElementById("sendBtn");
+
+    let historico = [];
+    let isLoading = false;
+
+    // Auto-resize textarea functionality
+    perguntaInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+    });
+
+    // Enhanced form submission
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pergunta = perguntaInput.value.trim();
+      if (!pergunta || isLoading) return;
+
+      isLoading = true;
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Enviando...</span>';
+
+      // Add user message with animation
+      const userMsg = document.createElement("div");
+      userMsg.className = "msg user";
+      userMsg.textContent = pergunta;
+      chat.appendChild(userMsg);
+      perguntaInput.value = "";
+      perguntaInput.style.height = 'auto';
+      chat.scrollTop = chat.scrollHeight;
+
+      // Enhanced loading message with typing indicator
+      const loadingMsg = document.createElement("div");
+      loadingMsg.className = "msg loading";
+      loadingMsg.innerHTML = `
+        <i class="fas fa-robot"></i>
+        <span>Openpyd está pensando</span>
+        <div class="typing-indicator">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+      `;
+      chat.appendChild(loadingMsg);
+      chat.scrollTop = chat.scrollHeight;
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pergunta, historico }),
+        });
+
+        const data = await res.json();
+        historico.push({ role: "user", content: pergunta });
+        historico.push({ role: "assistant", content: data.resposta });
+
+        chat.removeChild(loadingMsg);
+
+        // Enhanced response formatting
+        const formatada = data.resposta
+          .replace(/```python\n?([\s\S]*?)```/g, '<pre><code class="language-python">$1</code></pre>')
+          .replace(/```\n?([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+        const aiMsg = document.createElement("div");
+        aiMsg.className = "msg ai";
+        aiMsg.innerHTML = formatada;
+        chat.appendChild(aiMsg);
+        
+        Prism.highlightAll();
+        chat.scrollTop = chat.scrollHeight;
+      } catch (err) {
+        chat.removeChild(loadingMsg);
+        console.error(err);
+        
+        const errorMsg = document.createElement("div");
+        errorMsg.className = "msg ai";
+        errorMsg.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro ao consultar a IA. Tente novamente.';
+        chat.appendChild(errorMsg);
+        chat.scrollTop = chat.scrollHeight;
+      } finally {
+        isLoading = false;
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Enviar</span>';
+        perguntaInput.focus();
+      }
+    });
+
+    // Enhanced scroll behavior
+    chat.addEventListener("scroll", () => {
+      const threshold = chat.scrollHeight - chat.clientHeight - 100;
+      const shouldShow = chat.scrollTop < threshold;
+      
+      if (shouldShow && scrollBtn.style.display === "none") {
+        scrollBtn.style.display = "block";
+        scrollBtn.style.animation = "slideIn 0.3s ease-out";
+      } else if (!shouldShow && scrollBtn.style.display === "block") {
+        scrollBtn.style.display = "none";
+      }
+    });
+
+    scrollBtn.addEventListener("click", () => {
+      chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+
+    // Keyboard shortcuts
+    perguntaInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        form.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // Focus input on page load
+    window.addEventListener('load', () => {
+      perguntaInput.focus();
+    });
+  </script>
+</body>
+</html>
