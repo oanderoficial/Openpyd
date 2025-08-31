@@ -2,7 +2,7 @@
 
 # Assistente IA Especializado em Python
 
-**Openpyd** é uma aplicação web de chat inteligente que utiliza IA para auxiliar desenvolvedores Python. O projeto integra o modelo GPT-4.1-mini através da API Requesty, oferecendo respostas especializadas, exemplos de código e suporte ao desenvolvimento.
+**Openpyd** é uma aplicação web de chat inteligente que utiliza IA para auxiliar desenvolvedores Python. O projeto integra o modelo GPT-5-mini através da API Requesty, oferecendo respostas especializadas, exemplos de código e suporte ao desenvolvimento.
 
 ## Funcionalidades
 
@@ -39,7 +39,7 @@
 
 ### Integração IA
 - **Requesty API**: Roteador compatível com OpenAI
-- **GPT-4.1-mini**: Modelo de linguagem otimizado
+- **GPT-5-mini**: Modelo de linguagem otimizado
 - **Contexto Especializado**: Prompts específicos para Python
 
 ## Função das Bibliotecas Principais
